@@ -1,0 +1,93 @@
+
+R version 3.5.1 (2018-07-02) -- "Feather Spray"
+Copyright (C) 2018 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+R > # use custom package library
+R > .libPaths("/global/scratch/nhejazi/R")
+R > 
+R > # packages
+R > library(here)
+here() starts at /global/home/users/nhejazi/medshift-meta/simulations
+R > library(future)
+R > library(future.apply)
+R > library(data.table)
+R > library(tidyverse)
+-- Attaching packages --------------------------------------- tidyverse 1.2.1 --
+v ggplot2 3.1.1     v purrr   0.3.2
+v tibble  2.1.1     v dplyr   0.8.1
+v tidyr   0.8.3     v stringr 1.4.0
+v readr   1.3.1     v forcats 0.4.0
+-- Conflicts ------------------------------------------ tidyverse_conflicts() --
+x dplyr::between()   masks data.table::between()
+x dplyr::filter()    masks stats::filter()
+x dplyr::first()     masks data.table::first()
+x dplyr::lag()       masks stats::lag()
+x dplyr::last()      masks data.table::last()
+x purrr::transpose() masks data.table::transpose()
+R > library(sl3)
+R > library(tmle3)
+R > library(hal9001)
+Loading required package: Rcpp
+hal9001 v0.2.2: The Scalable Highly Adaptive Lasso
+R > library(medshift)
+medshift v0.1.0: Causal Mediation Analysis for Stochastic Interventions
+R > 
+R > # load scripts, parallelization, PRNG
+R > source(here("R", "01_setup_data.R"))
+R > source(here("R", "02_fit_estimators.R"))
+R > seed_int <- 7491
+R > plan(multiprocess, workers = 24)
+R > 
+R > # sample sizes with root-n spacing: n = {100,...,6400}
+R > n_obs <- cumsum(rep(sqrt(100), 8))^2
+R > 
+R > # simulation parameters
+R > n_sim <- 1000                         # number of simulations
+R > delta_shift <- 0.5                    # value of shift parameter
+R > sim_type <- "ipsi"                    # incremental propensity score
+R > 
+R > # sequential loop over different sample sizes
+R > sim_results <- lapply(seq_along(n_obs), function(iter) {
+...     # parallelized loop over iterations in the simulation
+...     results <- future_lapply(X = seq_len(n_sim), FUN = function(x) {
+...         data_sim <- sim_mediation_data(n_obs = n_obs[iter],
+...                                        type = sim_type)
+...         out <- fit_estimators(W = data_sim[[1]],
+...                               A = data_sim[[2]],
+...                               Z = data_sim[[3]],
+...                               Y = data_sim[[4]],
+...                               delta = delta_shift)
+...         out[, n_samp := n_obs[iter]]
+...         return(out)
+...     }, future.seed = seed_int)
+... 
+...     # save in list before moving to next sample size
+...     results <- rbindlist(results)
+...     return(results)
+... })
+R > 
+R > # save results to file
+R > names(sim_results) <- paste("n", n_obs, sep = "_")
+R > timestamp <- stringr::str_replace_all(Sys.time(), " ", "_")
+R > saveRDS(object = sim_results,
+...         file = here("data", paste0("medshift_binary_", timestamp,
+...                                    "_acic2019.rds")))
+R > 
+> proc.time()
+       user      system     elapsed 
+2711084.841    4414.387  119084.225 
