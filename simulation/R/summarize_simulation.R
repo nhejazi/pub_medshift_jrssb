@@ -21,7 +21,6 @@ label_maker <- c(
 
 # results and truth for parameter estimation simulation
 source(here("R", "get_truth.R"))
-#sim_results_file <- "medshift_binary_2019-05-20_19:42:04_acic2019.rds"
 sim_results_file <- "medshift_binary_2018-12-15_00:28:26_manuscript.rds"
 sim_results <- readRDS(here("data", sim_results_file))
 n_sim <- nrow(sim_results[[1]])
