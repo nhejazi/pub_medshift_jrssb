@@ -1,4 +1,4 @@
-# lie to pkgbuild, as per Jeremy
+# lie to pkgbuild
 pkgbuild:::cache_set("has_compiler", TRUE)
 
 # from CRAN
@@ -13,7 +13,7 @@ remotes::install_github(c("osofr/simcausal@master",
                           "osofr/condensier@master",
                           "tlverse/sl3@ceba727",
                           "tlverse/hal9001@783d3aa",
-                          "nhejazi/medshift@master"),
+                          "nhejazi/medshift@jrssb"),
                         lib = "/global/scratch/nhejazi/R")
 
 # update all packages

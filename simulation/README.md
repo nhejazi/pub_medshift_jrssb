@@ -11,6 +11,6 @@ source(here("R", "03_run_simulation_param.R"))
 ```
 
 The simulation study was originally run on 15 December 2018, prior to posting of
-the preprint and submission to JRSSB. At that time, R version 3.5.1 was used on
-[UC Berkeley's Savio
+the pre-print and submission to JRSS-B. At that time, R version 3.5.1 was used
+on [UC Berkeley's Savio high-performance computing
 cluster](https://research-it.berkeley.edu/services/high-performance-computing/system-overview).
